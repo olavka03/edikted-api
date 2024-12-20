@@ -54,7 +54,7 @@ export const createShippingProtectionVariant: RequestHandler = async (
           namespace: 'seo',
           key: 'hidden',
           type: 'number_integer',
-          value: 1,
+          value: '1',
         },
       ],
       productType: ShippingProtectionDefaultValues.Tag,
@@ -88,15 +88,13 @@ export const createShippingProtectionVariant: RequestHandler = async (
     );
   }
 
-  const availablePublications =
-    await publicationsService.retrieve(10);
+  const availablePublications = await publicationsService.retrieve(10);
 
-  const { userErrors: publishProductErrors } =
-    await productsService.publish({
-      productId,
-      input:
-        availablePublications?.map(({ id }) => ({ publicationId: id })) || [],
-    });
+  const { userErrors: publishProductErrors } = await productsService.publish({
+    productId,
+    input:
+      availablePublications?.map(({ id }) => ({ publicationId: id })) || [],
+  });
 
   validateGraphqlResponse(
     publishProductErrors,
@@ -125,8 +123,7 @@ export const retrieveShippingProtectionProducts: RequestHandler = async (
   const { tag } = req.query as { tag?: string };
 
   if (id) {
-    const shippingProtectionProduct =
-      await productsService.retrieveById(id);
+    const shippingProtectionProduct = await productsService.retrieveById(id);
 
     res.json([shippingProtectionProduct]);
 
@@ -134,8 +131,7 @@ export const retrieveShippingProtectionProducts: RequestHandler = async (
   }
 
   if (tag) {
-    const shippingProtectionProducts =
-      await productsService.retrieveByTag(tag);
+    const shippingProtectionProducts = await productsService.retrieveByTag(tag);
 
     res.json(shippingProtectionProducts);
 
@@ -170,11 +166,10 @@ export const retrieveShippingProtectionVariant: RequestHandler = async (
     return;
   }
 
-  const shippingProtection =
-    await productVariantsService.retrieveFirstByField({
-      key: query.field,
-      value: query.value,
-    });
+  const shippingProtection = await productVariantsService.retrieveFirstByField({
+    key: query.field,
+    value: query.value,
+  });
 
   res.json(shippingProtection);
 };
