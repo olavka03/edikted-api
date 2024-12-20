@@ -92,8 +92,8 @@ export const retrieveByTag = async (tag: string) => {
 
 export const create = async (createProductInput: CreateProductInput) => {
   const createProductMutation = gql`
-    mutation ProductCreate($input: ProductInput!) {
-      productCreate(input: $input) {
+    mutation ProductCreate($input: ProductInput!, $media: [CreateMediaInput!]) {
+      productCreate(input: $input, media: $media) {
         product {
           id
           title
