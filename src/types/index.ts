@@ -35,7 +35,7 @@ export type MetafieldType =
 export interface MetafieldInput {
   namespace: string;
   key: string;
-  value: string;
+  value: unknown;
   type: MetafieldType;
   description?: string;
 }

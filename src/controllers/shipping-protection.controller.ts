@@ -1,11 +1,14 @@
 import { RequestHandler } from 'express';
 import { ApiError } from '../exceptions/ApiError';
-import * as shippingProtectionService from '../services/shipping-protection.service';
+import * as productsService from '../services/products.service';
+import * as productVariantsService from '../services/product-variants.service';
+import * as productOptionsService from '../services/product-options.service';
+import * as publicationsService from '../services/publications.service';
+import { validateGraphqlResponse } from '../utils/validateGraphqlResponse';
 import {
   ProductVariantsBulkInput,
   ShippingProtectionDefaultValues,
 } from '../types';
-import { validateGraphqlResponse } from '../utils/validateGraphqlResponse';
 
 export const createShippingProtectionVariant: RequestHandler = async (
   req,
@@ -17,10 +20,9 @@ export const createShippingProtectionVariant: RequestHandler = async (
   let productId: string | null = null;
   let productHasOnlyDefaultVariant = false;
 
-  const shippingProtectionProduct =
-    await shippingProtectionService.retrieveProductsByTag(
-      tag || ShippingProtectionDefaultValues.Tag,
-    );
+  const shippingProtectionProduct = await productsService.retrieveByTag(
+    tag || ShippingProtectionDefaultValues.Tag,
+  );
 
   const availableShippingProtectionProduct = shippingProtectionProduct.find(
     ({ variantsCount }) => variantsCount.count < 100,
@@ -33,7 +35,7 @@ export const createShippingProtectionVariant: RequestHandler = async (
     const {
       product: createdShippingProtectionProduct,
       userErrors: createProductErrors,
-    } = await shippingProtectionService.createProduct({
+    } = await productsService.create({
       title: ShippingProtectionDefaultValues.Title,
       tags: [ShippingProtectionDefaultValues.Tag],
       descriptionHtml: ShippingProtectionDefaultValues.Description,
@@ -45,6 +47,14 @@ export const createShippingProtectionVariant: RequestHandler = async (
               name: ShippingProtectionDefaultValues.OptionValue,
             },
           ],
+        },
+      ],
+      metafields: [
+        {
+          namespace: 'seo',
+          key: 'hidden',
+          type: 'number_integer',
+          value: 1,
         },
       ],
       productType: ShippingProtectionDefaultValues.Tag,
@@ -70,7 +80,7 @@ export const createShippingProtectionVariant: RequestHandler = async (
 
   if (productHasOnlyDefaultVariant) {
     const { userErrors: createOptionErrors } =
-      await shippingProtectionService.createDefaultOption(productId);
+      await productOptionsService.createDefault(productId);
 
     validateGraphqlResponse(
       createOptionErrors,
@@ -79,10 +89,10 @@ export const createShippingProtectionVariant: RequestHandler = async (
   }
 
   const availablePublications =
-    await shippingProtectionService.retrievePublications();
+    await publicationsService.retrieve(10);
 
   const { userErrors: publishProductErrors } =
-    await shippingProtectionService.publishProduct({
+    await productsService.publish({
       productId,
       input:
         availablePublications?.map(({ id }) => ({ publicationId: id })) || [],
@@ -94,7 +104,7 @@ export const createShippingProtectionVariant: RequestHandler = async (
   );
 
   const { shippingProtection, userErrors: createProductVariantErrors } =
-    await shippingProtectionService.createVariant({
+    await productVariantsService.create({
       shippingProtectionInput,
       productId,
     });
@@ -116,7 +126,7 @@ export const retrieveShippingProtectionProducts: RequestHandler = async (
 
   if (id) {
     const shippingProtectionProduct =
-      await shippingProtectionService.retrieveProductById(id);
+      await productsService.retrieveById(id);
 
     res.json([shippingProtectionProduct]);
 
@@ -125,7 +135,7 @@ export const retrieveShippingProtectionProducts: RequestHandler = async (
 
   if (tag) {
     const shippingProtectionProducts =
-      await shippingProtectionService.retrieveProductsByTag(tag);
+      await productsService.retrieveByTag(tag);
 
     res.json(shippingProtectionProducts);
 
@@ -153,7 +163,7 @@ export const retrieveShippingProtectionVariant: RequestHandler = async (
 
   if (shippingProtectionId) {
     const shippingProtection =
-      await shippingProtectionService.retrieveVariantById(shippingProtectionId);
+      await productVariantsService.retrieveById(shippingProtectionId);
 
     res.json(shippingProtection);
 
@@ -161,7 +171,7 @@ export const retrieveShippingProtectionVariant: RequestHandler = async (
   }
 
   const shippingProtection =
-    await shippingProtectionService.retrieveFirstVariantByField({
+    await productVariantsService.retrieveFirstByField({
       key: query.field,
       value: query.value,
     });
