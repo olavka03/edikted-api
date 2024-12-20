@@ -6,7 +6,7 @@ import * as productOptionsService from '../services/product-options.service';
 import * as publicationsService from '../services/publications.service';
 import { validateGraphqlResponse } from '../utils/validateGraphqlResponse';
 import {
-  ProductVariantsBulkInput,
+  CreateShippingProtectionsBody,
   ShippingProtectionDefaultValues,
 } from '../types';
 
@@ -14,7 +14,8 @@ export const createShippingProtectionVariant: RequestHandler = async (
   req,
   res,
 ) => {
-  const shippingProtectionInput = req.body as ProductVariantsBulkInput[];
+  const createShippingProtectionsBody =
+    req.body as CreateShippingProtectionsBody;
   const { tag } = req.query as { tag?: string };
 
   let productId: string | null = null;
@@ -36,28 +37,31 @@ export const createShippingProtectionVariant: RequestHandler = async (
       product: createdShippingProtectionProduct,
       userErrors: createProductErrors,
     } = await productsService.create({
-      title: ShippingProtectionDefaultValues.Title,
-      tags: [ShippingProtectionDefaultValues.Tag],
-      descriptionHtml: ShippingProtectionDefaultValues.Description,
-      productOptions: [
-        {
-          name: ShippingProtectionDefaultValues.OptionName,
-          values: [
-            {
-              name: ShippingProtectionDefaultValues.OptionValue,
-            },
-          ],
-        },
-      ],
-      metafields: [
-        {
-          namespace: 'seo',
-          key: 'hidden',
-          type: 'number_integer',
-          value: '1',
-        },
-      ],
-      productType: ShippingProtectionDefaultValues.Tag,
+      product: {
+        title: ShippingProtectionDefaultValues.Title,
+        tags: [ShippingProtectionDefaultValues.Tag],
+        descriptionHtml: ShippingProtectionDefaultValues.Description,
+        productOptions: [
+          {
+            name: ShippingProtectionDefaultValues.OptionName,
+            values: [
+              {
+                name: ShippingProtectionDefaultValues.OptionValue,
+              },
+            ],
+          },
+        ],
+        metafields: [
+          {
+            namespace: 'seo',
+            key: 'hidden',
+            type: 'number_integer',
+            value: '1',
+          },
+        ],
+        productType: ShippingProtectionDefaultValues.Tag,
+      },
+      media: createShippingProtectionsBody.productMedia,
     });
 
     validateGraphqlResponse(
@@ -103,7 +107,7 @@ export const createShippingProtectionVariant: RequestHandler = async (
 
   const { shippingProtection, userErrors: createProductVariantErrors } =
     await productVariantsService.create({
-      shippingProtectionInput,
+      shippingProtectionInput: createShippingProtectionsBody.productVariants,
       productId,
     });
 

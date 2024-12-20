@@ -8,6 +8,13 @@ export enum ProductVariantInventoryPolicy {
   Continue = 'CONTINUE',
 }
 
+export enum MediaContentType {
+  EXTERNAL_VIDEO = 'EXTERNAL_VIDEO',
+  IMAGE = 'IMAGE',
+  MODEL_3D = 'MODEL_3D',
+  VIDEO = 'VIDEO',
+}
+
 export interface InventoryItemInput {
   cost?: Money;
   tracked?: boolean;
@@ -66,6 +73,11 @@ export interface ProductVariantsBulkInput {
   taxCode?: string;
 }
 
+export interface CreateShippingProtectionsBody {
+  productVariants: ProductVariantsBulkInput[];
+  productMedia?: CreateMediaInput[];
+}
+
 export interface OptionCreateInput {
   name: string;
   values: {
@@ -73,34 +85,43 @@ export interface OptionCreateInput {
   }[];
 }
 
+export interface CreateMediaInput {
+  originalSource: string;
+  mediaContentType: MediaContentType;
+  alt?: string;
+}
+
 export interface CreateProductInput {
-  categoryId?: string;
-  claimOwnership?: {
-    bundles?: boolean;
+  product: {
+    categoryId?: string;
+    claimOwnership?: {
+      bundles?: boolean;
+    };
+    collectionsToJoin?: string[];
+    collectionsToLeave?: string[];
+    combinedListingRole?: 'PRIMARY' | 'SECONDARY' | 'HIDDEN';
+    customProductType?: string;
+    descriptionHtml?: string;
+    giftCard?: boolean;
+    giftCardTemplateSuffix?: string;
+    handle?: string;
+    id?: string;
+    metafields?: MetafieldInput[];
+    productOptions?: OptionCreateInput[];
+    productType?: string;
+    redirectNewHandle?: boolean;
+    requiresSellingPlan?: boolean;
+    seo?: {
+      title?: string;
+      description?: string;
+    };
+    status?: 'ACTIVE' | 'ARCHIVED' | 'DRAFT';
+    tags?: string[];
+    templateSuffix?: string;
+    title: string;
+    vendor?: string;
   };
-  collectionsToJoin?: string[];
-  collectionsToLeave?: string[];
-  combinedListingRole?: 'PRIMARY' | 'SECONDARY' | 'HIDDEN';
-  customProductType?: string;
-  descriptionHtml?: string;
-  giftCard?: boolean;
-  giftCardTemplateSuffix?: string;
-  handle?: string;
-  id?: string;
-  metafields?: MetafieldInput[];
-  productOptions?: OptionCreateInput[];
-  productType?: string;
-  redirectNewHandle?: boolean;
-  requiresSellingPlan?: boolean;
-  seo?: {
-    title?: string;
-    description?: string;
-  };
-  status?: 'ACTIVE' | 'ARCHIVED' | 'DRAFT';
-  tags?: string[];
-  templateSuffix?: string;
-  title: string;
-  vendor?: string;
+  media?: CreateMediaInput[];
 }
 
 export interface ShippingProtection {

@@ -90,7 +90,7 @@ export const retrieveByTag = async (tag: string) => {
   return products.nodes || null;
 };
 
-export const create = async (productInput: CreateProductInput) => {
+export const create = async (createProductInput: CreateProductInput) => {
   const createProductMutation = gql`
     mutation ProductCreate($input: ProductInput!) {
       productCreate(input: $input) {
@@ -119,7 +119,8 @@ export const create = async (productInput: CreateProductInput) => {
   `;
 
   const variabels = {
-    input: productInput,
+    input: createProductInput.product,
+    media: createProductInput?.media || [],
   };
 
   const { productCreate } =
@@ -131,10 +132,7 @@ export const create = async (productInput: CreateProductInput) => {
   return productCreate;
 };
 
-export const publish = async ({
-  productId,
-  input,
-}: PublishProductProps) => {
+export const publish = async ({ productId, input }: PublishProductProps) => {
   const publishProductMutation = gql`
     mutation publishablePublish($id: ID!, $input: [PublicationInput!]!) {
       publishablePublish(id: $id, input: $input) {
