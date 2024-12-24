@@ -58,7 +58,7 @@ export const createShippingProtectionVariant: RequestHandler = async (
     throw new ApiError(400, 'Invalid product ID');
   }
 
-  const availablePublications = await publicationsService.retrieve(10);
+  const availablePublications = await publicationsService.retrieve(20);
 
   const { userErrors: publishProductErrors } = await productsService.publish({
     productId,
@@ -66,10 +66,23 @@ export const createShippingProtectionVariant: RequestHandler = async (
       availablePublications?.map(({ id }) => ({ publicationId: id })) || [],
   });
 
+  console.log({ publishProductErrors });
+
   validateGraphqlResponse(
     publishProductErrors,
-    'Error occured publishing product',
+    'Error occured during publishing product',
   );
+
+  const data = await productsService.checkPublish(productId);
+
+  console.log({
+    data,
+    resourcePublicationsV2: data.product.resourcePublicationsV2.nodes,
+    catalogs: data.product.resourcePublicationsV2.nodes.map(
+      // @ts-ignore
+      ({ publication }) => publication.catalog.title,
+    ),
+  });
 
   const { shippingProtection, userErrors: createProductVariantErrors } =
     await productVariantsService.create({
