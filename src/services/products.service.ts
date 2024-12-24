@@ -157,33 +157,3 @@ export const publish = async ({ productId, input }: PublishProductProps) => {
 
   return publishablePublish;
 };
-
-export const checkPublish = async (productId: string) => {
-  const query = gql`
-    query CheckProduct($productId: ID!) {
-      product(id: $productId) {
-        id
-        publishedAt
-        resourcePublicationsV2(onlyPublished: false, first: 240) {
-          nodes {
-            isPublished
-            publishDate
-            publication {
-              catalog {
-                title
-              }
-            }
-          }
-        }
-      }
-    }
-  `;
-
-  const variables = {
-    productId,
-  };
-
-  const data = await shopifyGraphqlClient.request(query, variables);
-
-  return data;
-};
